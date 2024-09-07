@@ -1,0 +1,16 @@
+/*
+Theme Name:Child theme 
+Theme URI:http://b-vasquez-mces.local/
+Description: "main-css"
+Author: "andz"
+Author URI: http://b-vasquez-mces.local/
+Template: hello-elementor
+Version: 2
+Text Domain: hello-elementor-child
+*/
+
+.wp-block-site-title{
+
+    color: #c80430;
+    font-size: 22px
+}
