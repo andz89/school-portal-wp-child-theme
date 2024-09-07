@@ -13,16 +13,13 @@ function enqueue_parent_styles(){
 };
 
 
-
-
-// Add shortcode for ACF field
  // Add shortcode for ACF field
  function display_acf_field($atts) {
     // Define default attributes (arguments)
     $atts = shortcode_atts(
         array(
-            'field' => '',  // Default value for 'field' (empty if not provided)
-            'post_title' => '',  // Default value for 'post_title' (empty if not provided)
+            'field' => '',  // Default value for 'field'
+            'post_title' => '',  // Default value for 'post_title'
         ),
         $atts,  // Attributes passed by the user
         'acf_field_total_enrollment' // The shortcode tag
@@ -47,16 +44,13 @@ function enqueue_parent_styles(){
 add_shortcode('acf_field_total_enrollment', 'display_acf_field');
 
 
-
-
-
 function hide_permalink_for_specific_post_type_css() {
     global $post;
     if($post == null){
         return "";
     }
     $user_grade_level = get_user_meta( get_current_user_id(), 'grade_level', true );
-    // Check if the post type is your specific post type (e.g., 'your_post_type')
+    // Check if the post type is your specific post type 
     if( $user_grade_level !== 'Administrative Officer' && !current_user_can('administrator') ){
         add_filter('screen_options_show_screen', '__return_false');
         echo '
@@ -109,7 +103,7 @@ function hide_permalink_for_specific_post_type_css() {
 function restrict_add_new_post() {
     // Check if the user is not an administrator
     if (current_user_can('administrator')) {
-        add_action('admin_head', 'hide_permalink_for_specific_post_type_css');
+        add_action('admin_head', 'hide_permalink_for_specific_post_type_css');// development mode only
     }else{
         add_action('admin_head', 'hide_permalink_for_specific_post_type_css');
     }
@@ -132,9 +126,7 @@ add_action('admin_footer', 'hide_all_submenus_with_js');
 
 
 function hide_posts_for_non_admins( $query ) {
-    // Check if we're in the admin area and viewing a post type list
- 
-        
+
         // Check if the current user is not an administrator
         if ( is_admin() && $query->is_main_query() && !current_user_can('administrator') ) {
 
