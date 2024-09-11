@@ -14,10 +14,11 @@ function enqueue_parent_styles(){
 
 
  // Add shortcode for ACF field
- function display_acf_field($atts) {
+ function display_acf_field1($atts) {
     // Define default attributes (arguments)
     $atts = shortcode_atts(
         array(
+            'post_type'=>'post',
             'field' => '',  // Default value for 'field'
             'post_title' => '',  // Default value for 'post_title'
         ),
@@ -26,7 +27,7 @@ function enqueue_parent_styles(){
     );
     
     // Fetch the post by title
-    $post = get_page_by_title($atts['post_title'], OBJECT, get_post_types()); // You can specify the post type if needed
+    $post = get_page_by_title($atts['post_title'], OBJECT, $atts['post_type']); // You can specify the post type if needed
     
     // Check if post is found
     if ($post) {
@@ -41,6 +42,40 @@ function enqueue_parent_styles(){
         return 'Post not found';
     }
 }
+//add_shortcode('acf_field_total_enrollment_2024-2025', 'display_acf_field1');
+
+ // Add shortcode for ACF field
+ function display_acf_field($atts) {
+
+   
+    // Define default attributes (arguments)
+    $atts = shortcode_atts(
+        array(
+            'post_type'=>'',
+            'field' => '',  // Default value for 'field'
+            'post_title' => '',  // Default value for 'post_title'
+        ),
+        $atts,  // Attributes passed by the user
+        'acf_field_total_enrollment' // The shortcode tag
+    );
+    
+    // Fetch the post by title
+    $post = get_page_by_title($atts['post_title'], OBJECT, $atts['post_type']); // You can specify the post type if needed
+    
+    // Check if post is found
+    if ($post) {
+        $post_id = $post->ID; // Get the post ID
+        
+        // Fetch the ACF field value using the provided field name and post ID
+        $field_value = get_field($atts['field'], $post_id);
+        
+        // Return the field value or a default message if the field is empty
+        return !empty($field_value) ? $field_value : 'Field not found or empty';
+    } else {
+        return 'Post not found';
+    }
+}
+
 add_shortcode('acf_field_total_enrollment', 'display_acf_field');
 
 
@@ -55,38 +90,18 @@ function hide_permalink_for_specific_post_type_css() {
         add_filter('screen_options_show_screen', '__return_false');
         echo '
         <style>
-            .wrap .page-title-action {
-                display: none;
-            }
-            #edit-slug-box {
-                display: none;
-            }
-
-              /* Hide "Move to Trash" button on post edit screen */
-            #delete-action {
-                display: none;
-            }
-                 .row-actions{
-                display: none;
-            }
-
-           #wp-admin-bar-new-content{
-              display: none;
-           }
-           #wp-admin-bar-comments{
-               display: none;
-           }
-
-            #minor-publishing {
-                display: none;
-            }
-           
+            
+         
+       
+        
+               
             /* This ensures that the styles work across all screen sizes */
         @media screen and (max-width: 10000px) {
             .wrap .page-title-action, #edit-slug-box, #delete-action, .row-actions,
-            #wp-admin-bar-new-content, #wp-admin-bar-comments, #minor-publishing {
+            #wp-admin-bar-new-content, #wp-admin-bar-comments, #misc-publishing-actions {
                 display: none !important;
             }
+             
         }
         </style>';
 
@@ -195,3 +210,57 @@ function hide_menus_for_non_admin_officers() {
     }
 }
 add_action( 'admin_menu', 'hide_menus_for_non_admin_officers', 999 );
+
+
+// Create a shortcode to display the post type name
+function display_post_type_name() {
+    global $post;
+
+    // Check if post exists
+    if (!$post) {
+        return '';
+    }
+
+    // Get the current post type
+    $post_type = get_post_type($post->ID);
+
+    // Get the post type object
+    $post_type_object = get_post_type_object($post_type);
+
+    // Check if post type object exists
+    if ($post_type_object) {
+        // Return the post type's singular name
+        return esc_html($post_type_object->labels->singular_name);
+    }
+
+    return '';
+}
+
+// Register the shortcode
+add_shortcode('post_type_name', 'display_post_type_name');
+ 
+
+function expose_custom_fields_to_rest() {
+    // Define your custom post type (sy2024-2026)
+    $post_type = 'sy2024-2026'; 
+
+    // Add support for custom fields in the REST API for the custom post type
+    register_rest_field(
+        $post_type, // Your custom post type
+        'custom_fields', // The key you want to return in the REST API
+        array(
+            'get_callback'    => 'get_custom_fields_for_api', // Function to get custom field value
+            'update_callback' => null,
+            'schema'          => null,
+        )
+    );
+}
+
+add_action('rest_api_init', 'expose_custom_fields_to_rest');
+
+// Callback function to get custom field values
+function get_custom_fields_for_api($object) {
+    $post_id = $object['id'];
+    // Retrieve all custom fields for the post
+    return get_post_meta($post_id);
+}
